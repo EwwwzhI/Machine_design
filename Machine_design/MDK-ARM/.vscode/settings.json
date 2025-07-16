@@ -1,3 +1,9 @@
 {
-    "editor.linkedEditing": true
+    "editor.linkedEditing": true,
+    "files.associations": {
+        "main.h": "c",
+        "freertos.h": "c",
+        "cmsis_os.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }

@@ -3,12 +3,15 @@
 "machine_design\main.o"
 "machine_design\gpio.o"
 "machine_design\freertos.o"
+"machine_design\dac.o"
 "machine_design\dma.o"
 "machine_design\tim.o"
 "machine_design\usart.o"
 "machine_design\stm32f4xx_it.o"
 "machine_design\stm32f4xx_hal_msp.o"
 "machine_design\stm32f4xx_hal_timebase_tim.o"
+"machine_design\stm32f4xx_hal_dac.o"
+"machine_design\stm32f4xx_hal_dac_ex.o"
 "machine_design\stm32f4xx_hal_rcc.o"
 "machine_design\stm32f4xx_hal_rcc_ex.o"
 "machine_design\stm32f4xx_hal_flash.o"
@@ -37,7 +40,7 @@
 "machine_design\heap_4.o"
 "machine_design\port.o"
 "machine_design\control.o"
---strict --scatter "Machine_design\Machine_design.sct"
+--library_type=microlib --strict --scatter "Machine_design\Machine_design.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
 --list "Machine_design.map" -o Machine_design\Machine_design.axf

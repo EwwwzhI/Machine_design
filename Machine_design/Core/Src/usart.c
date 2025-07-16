@@ -22,15 +22,15 @@
 
 /* USER CODE BEGIN 0 */
 #include <stdio.h>
-#ifndef __GNUC__		// 如果不使用ARM CC V6编译器
+#ifndef __GNUC__		// 如果不使用ARM CC V6编译�?
 #pragma import(__use_no_semihosting)  // 不使用半主机函数
 struct __FILE{int handle;};	// 标准库需要的支持函数
-void _sys_exit(int x) {x = x;}	// 避免使用半主机模式
+void _sys_exit(int x) {x = x;}	// 避免使用半主机模�?
 #endif
 
-FILE __stdout; 			// ARM CC V6版本需要添加支持
+FILE __stdout; 			// ARM CC V6版本�?要添加支�?
 int fputc(int ch, FILE *f) {
-	HAL_UART_Transmit(&huart1 , (uint8_t *)&ch, 1, 0xFFFF);
+	HAL_UART_Transmit(&huart2 , (uint8_t *)&ch, 1, 0xFFFF);
 	return(ch);
 }
 /* USER CODE END 0 */

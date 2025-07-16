@@ -57,6 +57,18 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define PT_LUNZI_Pin GPIO_PIN_2
+#define PT_LUNZI_GPIO_Port GPIOE
+#define LP_LUNZI_Pin GPIO_PIN_3
+#define LP_LUNZI_GPIO_Port GPIOE
+#define GROUND_DIR_Pin GPIO_PIN_1
+#define GROUND_DIR_GPIO_Port GPIOA
+#define platform_dir2_Pin GPIO_PIN_15
+#define platform_dir2_GPIO_Port GPIOE
+#define platform_dir1_Pin GPIO_PIN_13
+#define platform_dir1_GPIO_Port GPIOB
+#define panzi_dir_Pin GPIO_PIN_8
+#define panzi_dir_GPIO_Port GPIOC
 
 /* USER CODE BEGIN Private defines */
 

@@ -50,7 +50,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 uint8_t rx_buf[128];			//接收缓冲数组
-uint8_t start = 0;
+
 /* USER CODE END Variables */
 /* Definitions for MainTask */
 osThreadId_t MainTaskHandle;
@@ -63,6 +63,13 @@ const osThreadAttr_t MainTask_attributes = {
 osThreadId_t TaskStateHandle;
 const osThreadAttr_t TaskState_attributes = {
   .name = "TaskState",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for SecondTask */
+osThreadId_t SecondTaskHandle;
+const osThreadAttr_t SecondTask_attributes = {
+  .name = "SecondTask",
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
@@ -79,6 +86,7 @@ const osMessageQueueAttr_t myQueue01_attributes = {
 
 void StartMainTask(void *argument);
 void StartStateUart(void *argument);
+void StartSecondTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -119,6 +127,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of TaskState */
   TaskStateHandle = osThreadNew(StartStateUart, NULL, &TaskState_attributes);
 
+  /* creation of SecondTask */
+  SecondTaskHandle = osThreadNew(StartSecondTask, NULL, &SecondTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -139,65 +150,22 @@ void MX_FREERTOS_Init(void) {
 void StartMainTask(void *argument)
 {
   /* USER CODE BEGIN StartMainTask */
-  HAL_UARTEx_ReceiveToIdle_DMA(&huart2,rx_buf,127);			//�?启DMA空闲接收中断
-  SE_init();//初始�?
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart2,rx_buf,127);			//�????????????启DMA空闲接收中断
+  SE_init();//初始�????????????
   osDelay(1000);
+  
   while(1){
      osDelay(1);
-     if(start == 1)break;//等待串口发�?�启动指�?
+     if(start == 1)break;//等待串口发�?�启动指�????????????
   }
-  // int parameter = 0;
-  LP_start();//启动落盘
-  CSD_Move(1);//启动传送带
-  osDelay(1600);
-  CSD_Move(0);//停止传送带
-  osDelay(1000);
-  __HAL_TIM_SET_PRESCALER(&htim4,1260-1);//传送带降速
-  __HAL_TIM_SET_COMPARE(&htim12,TIM_CHANNEL_2,70);//落土滚筒启动
-  osDelay(2250);
-  __HAL_TIM_SET_COMPARE(&htim12,TIM_CHANNEL_2,0);//落土滚筒关闭
-  CSD_Move(1);//启动传送带
-  osDelay(1000);
-  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 110);//刮土装置打开
-  osDelay(600);
-  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 190);//刮土装置关闭
-  osDelay(4500);
-  CSD_Move(0);//停止传送带
-  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 120);//刮土装置打开
-  osDelay(500);
-  CSD_Move(1);//启动传送带
-  osDelay(1200);
-  CSD_Move(0);//停止传送带
-  ZZ_start();//落种子程序启动
-  CSD_Move(1);//启动传送带
-  osDelay(4000);
-  CSD_Move(0);//停止传送带
+  con1_half();
+  start=2;
+  first_half();
+
   /* Infinite lo26 */
   for(;;)
   {
-    //__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,0);//TIM4通道2PWM初始化（右传送带�?
-	  //__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_4,0);//TIM4通道4PWM初始化（左传送带�?
-    //__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1,1000);
-    // ZZ_PWM(2);
-     
-    // __HAL_TIM_SET_COMPARE(&htim12,TIM_CHANNEL_2,70);
-    // osDelay(2050);
-
-    
-    // osDelay(2500);
-    // ZZ_PWM(0);
-    // osDelay(5000);
-    //ZZ_PWM(1);
-   // __HAL_TIM_SET_COMPARE(&htim9,TIM_CHANNEL_1,50);
-    
-    //  osDelay(1000);
-    // FU_DJPWM(1);
-    // BU_DJPWM(1);
-    // osDelay(5000);
-    // ZZ_PWM(0);
     osDelay(1);
-    // FU_DJPWM(0);
-    // BU_DJPWM(0);
   }
   /* USER CODE END StartMainTask */
 }
@@ -216,15 +184,83 @@ void StartStateUart(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    if(osMessageQueueGet(myQueue01Handle,dat,NULL,10) == osOK){//接收到串口数�?
+    if(osMessageQueueGet(myQueue01Handle,dat,NULL,10) == osOK){//接收到串口数�????????????
       if(strstr(dat,"start") == dat){
         start = 1;
-        printf("start\r\n");
       }
 		}
+    switch(send_state){
+      case 1:
+        printf("ground1.pic=33\xff\xff\xff");
+        send_state = 0;
+        break;
+      case 2:
+        printf("zhong.pic=34\xff\xff\xff");
+        send_state = 0;
+        break;
+      case 3:
+        printf("cnt1.pic=35\xff\xff\xff");
+        send_state = 0;
+        break;
+      case 4:
+        printf("ground2.pic=36\xff\xff\xff");
+        send_state = 0;
+        break;
+      case 5:
+        printf("paibu.pic=37\xff\xff\xff");
+        send_state = 0;
+        break;
+      case 6:
+        printf("ground3.pic=38\xff\xff\xff");
+        send_state = 0;
+        break;
+      case 7:
+        printf("zhong2.pic=39\xff\xff\xff");
+        send_state = 0;
+        break;
+      case 8:
+        printf("cnt2.pic=40\xff\xff\xff");
+        send_state = 0;
+        break;
+      case 9:
+        printf("ground4.pic=41\xff\xff\xff");
+        send_state = 0;
+        break;
+      case 10:
+        printf("all.pic=42\xff\xff\xff");
+        send_state = 0;
+        break;
+    }
     osDelay(1);
   }
   /* USER CODE END StartStateUart */
+}
+
+/* USER CODE BEGIN Header_StartSecondTask */
+/**
+* @brief Function implementing the SecondTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartSecondTask */
+void StartSecondTask(void *argument)
+{
+  /* USER CODE BEGIN StartSecondTask */
+  osDelay(1000);
+
+  while(1){
+     osDelay(1);
+     if(start == 2)break;//等待串口发�?�启动指�????????????
+  }
+  con2_half();
+  second_half();
+
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartSecondTask */
 }
 
 /* Private application code --------------------------------------------------*/
@@ -239,3 +275,4 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef*huart,uint16_t Size){
 	}
 }
 /* USER CODE END Application */
+
